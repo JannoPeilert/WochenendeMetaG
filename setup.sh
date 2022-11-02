@@ -8,7 +8,7 @@
 #############
 if [[ $1 = "" ]] ; then
     # Install_directory for Wochenende on your system, full path
-    wochenende_install_dir=/mnt/ngsnfs/tools/dev/Wochenende
+    wochenende_install_dir=/mnt/ngsnfs/gen/rcug_lw/Janno/WochenendeMetaG/WochenendeMetaG
     # Install_directory for Haybaler https://github.com/MHH-RCUG/haybaler on your system, full path
     haybaler_install_dir=/mnt/ngsnfs/tools/dev/haybaler
 

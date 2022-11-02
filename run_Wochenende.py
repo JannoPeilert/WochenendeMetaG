@@ -107,7 +107,7 @@ print("Wochenende - Whole Genome/Metagenome Sequencing Alignment Pipeline")
 print("Wochenende was created by Dr. Colin Davenport, Tobias Scheithauer, "
       "Sophia Poertner and Fabian Friedrich with help from many further contributors "
       "https://github.com/MHH-RCUG/Wochenende/graphs/contributors")
-print("version: " + version)
+print("version: " + version + "MetaG-Adaption")
 print()
 
 
