@@ -112,6 +112,11 @@ then
     echo "INFO: Copying directory growth_rate, as it was missing!" 
     cp -R $wochenende_dir/growth_rate .
 fi
+if [[ ! -d "metaG" ]]
+then
+    echo "INFO: Copying directory metaG, as it was missing!"
+    cp -R $wochenende_dir/growth_rate .
+fi
 if [[ ! -f "reporting/ref.tmp" ]] 
 then
     echo "INFO: Missing file reporting/ref.tmp , attempting to copy ./ref.tmp to reporting/ref.tmp" 
@@ -128,6 +133,7 @@ while [[ "$#" -gt 0 ]]; do
         -p) runPlotting="1";  ;;
         -g) runGrowth="1";  ;;
         -h) runHaybaler="1";  ;;
+        -m) runMetaG="1";  ;;
         *) echo "Unknown parameter passed: $1"; exit 1 ;;
     esac
     shift
@@ -140,6 +146,7 @@ then
     runPlotting="1"
     runGrowth="1"
     runHaybaler="1"
+    runMetaG="1"
 fi
 echo "###################################################"
 echo "INFO: Selected stages via command line args  (1 means activated)"
@@ -149,6 +156,7 @@ echo "INFO: Arguments Run haybaler (-h)     : $runHaybaler"
 echo "INFO: Arguments Run Raspir (-s)       : $runRaspir"
 echo "INFO: Arguments Run plotting (-p)     : $runPlotting"
 echo "INFO: Arguments Run growth rate (-g)  : $runGrowth"
+echo "INFO: Arguments Run MetaG (-m)        : $runMetaG"
 
 echo "INFO: Starting Wochenende_postprocess" 
 echo "INFO: Current directory" $bamDir >>$output_log 2>&1
