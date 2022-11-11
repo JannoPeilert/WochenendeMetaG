@@ -35,7 +35,7 @@ version="0.36, Jan 2022"
 
 
 echo "INFO: Postprocess Wochenende BAM and bam.txt files for plotting, reporting and haybaler integration" 
-echo "INFO: Version: " $version
+echo "INFO: Version: " "$version"
 echo "INFO: Usage: bash wochenende_postprocess.sh args"
 echo "INFO: Usage: bash wochenende_postprocess.sh -r -h -s -p -g"
 echo "INFO: Remember to run this using the haybaler conda environment if available - we attempt to load this in the script"
@@ -47,13 +47,13 @@ echo "INFO:  ####### "
 
 
 # Setup conda, directories and SLURM using data parsed from config.yaml
-source $WOCHENENDE_DIR/scripts/parse_yaml.sh
-eval $(parse_yaml $WOCHENENDE_DIR/config.yaml)
+source "$WOCHENENDE_DIR"/scripts/parse_yaml.sh
+eval $(parse_yaml "$WOCHENENDE_DIR"/config.yaml)
 haybaler_dir=$HAYBALER_DIR
 wochenende_dir=$WOCHENENDE_DIR
 # Set and activate existing conda env
-. $CONDA_SH_PATH
-conda activate $WOCHENENDE_CONDA_ENV_NAME
+. "$CONDA_SH_PATH"
+conda activate "$WOCHENENDE_CONDA_ENV_NAME"
 # Setup job scheduler
 # use SLURM job scheduler (yes, no)
 if [[ "${USE_SLURM}" == "yes" && "${USE_CUSTOM_SCHED}" == "yes" ]]; then
@@ -87,35 +87,35 @@ bamDir=$(pwd)
 # Cleanup previous results to a directory with a random name which includes a number, calculated here.
 rand_number=$RANDOM
 # Save output log in directory containing bams and preprocess script
-output_log=$bamDir"/postprocess_"$(date +%s)".log"
-echo "INFO: output_log: " $output_log
+output_log=$bamDir"/postprocess_$(date +%s).log"
+echo "INFO: output_log: " "$output_log"
 
 
 ### Check if required directories/files exist, copy if missing ###
 if [[ ! -d "reporting" ]] 
 then
     echo "INFO: Copying directory reporting, as it was missing! Use get_wochenende.sh to set up Wochenende properly." 
-    cp -R $wochenende_dir/reporting .
+    cp -R "$wochenende_dir"/reporting .
 fi
 if [[ ! -d "plots" ]] 
 then
     echo "INFO: Copying directory plots, as it was missing!" 
-    cp -R $wochenende_dir/plots .
+    cp -R "$wochenende_dir"/plots .
 fi
 if [[ ! -d "extract" ]] 
 then
     echo "INFO: Copying directory extract, as it was missing!" 
-    cp -R $wochenende_dir/extract .
+    cp -R "$wochenende_dir"/extract .
 fi
 if [[ ! -d "growth_rate" ]] 
 then
     echo "INFO: Copying directory growth_rate, as it was missing!" 
-    cp -R $wochenende_dir/growth_rate .
+    cp -R "$wochenende_dir"/growth_rate .
 fi
 if [[ ! -d "metaG" ]]
 then
     echo "INFO: Copying directory metaG, as it was missing!"
-    cp -R $wochenende_dir/growth_rate .
+    cp -R "$wochenende_dir"/growth_rate .
 fi
 if [[ ! -f "reporting/ref.tmp" ]] 
 then
@@ -159,9 +159,9 @@ echo "INFO: Arguments Run growth rate (-g)  : $runGrowth"
 echo "INFO: Arguments Run MetaG (-m)        : $runMetaG"
 
 echo "INFO: Starting Wochenende_postprocess" 
-echo "INFO: Current directory" $bamDir >>$output_log 2>&1
-echo "INFO: Current directory" $bamDir
-echo "INFO: Current directory" $bamDir >>$output_log 2>&1
+echo "INFO: Current directory" "$bamDir" >>"$output_log" 2>&1
+echo "INFO: Current directory" "$bamDir"
+echo "INFO: Current directory" "$bamDir" >>"$output_log" 2>&1
 sleep 3
 
 
@@ -178,11 +178,11 @@ fi
 # Run reporting 
 if [[ $runReporting == "1" ]]; then
     echo "INFO: Started Wochenende reporting"
-    echo "INFO: Started Wochenende reporting" >>$output_log 2>&1
-    cd $bamDir
+    echo "INFO: Started Wochenende reporting" >>"$output_log" 2>&1
+    cd "$bamDir"
     cd reporting
     cp ../*.bam.txt .
-    bash run_Wochenende_reporting_SLURM.sh >>$output_log 2>&1
+    bash run_Wochenende_reporting_SLURM.sh >>"$output_log" 2>&1
     wait
     echo "INFO: Sleeping for "$sleeptimer "to allow writes to complete."
     sleep $sleeptimer
@@ -192,28 +192,28 @@ fi
 # Run haybaler
 if [[ $runHaybaler == "1" ]]; then
     echo "INFO: Start Haybaler"
-    echo "INFO: Start Haybaler" >>$output_log 2>&1
+    echo "INFO: Start Haybaler" >>"$output_log" 2>&1
     if [[ ! -d "haybaler" ]]
         then
         mkdir haybaler
     fi
     # count files and only copy files that exist to avoid missing files errors
-    count_mq20=`ls -1 *mq20.bam*us*.csv 2>/dev/null | wc -l`
-    count_mq30=`ls -1 *mq30.bam*us*.csv 2>/dev/null | wc -l`
-    count_dup=`ls -1 *dup.bam*us*.csv 2>/dev/null | wc -l`
-    count=`ls -1 *.bam*us*.csv 2>/dev/null | wc -l`
+    count_mq20=$(find ./*mq20.bam*us*.csv -maxdepth 1 2>/dev/null | wc -l)
+    count_mq30=$(find ./*mq30.bam*us*.csv -maxdepth 1 2>/dev/null | wc -l)
+    count_dup=$(find ./*dup.bam*us*.csv -maxdepth 1 2>/dev/null | wc -l)
+    count=$(find ./*.bam*us*.csv -maxdepth 1 2>/dev/null | wc -l)
     if [[ $count_mq30 != 0 ]]
         then
-        cp *mq30.bam*us*.csv haybaler
+        cp ./*mq30.bam*us*.csv haybaler
     elif [[ $count_mq20 != 0 ]]
         then
-        cp *mq20.bam*us*.csv haybaler
+        cp ./*mq20.bam*us*.csv haybaler
     elif [[ $count_dup != 0 ]]
         then
-        cp *dup.bam*us*.csv haybaler
+        cp ./*dup.bam*us*.csv haybaler
     elif [[ $count != 0 ]]
         then
-        cp *.bam*us*.csv haybaler
+        cp ./*.bam*us*.csv haybaler
     else
         echo "WARNING: No bam*us*.csv found to process for haybaler"
         echo "INFO: Attempting to find and copy bam*us*.csv to haybaler"
@@ -221,30 +221,29 @@ if [[ $runHaybaler == "1" ]]; then
         cp csv/*.bam*us*.csv haybaler
     fi
     cd haybaler
-    conda activate $HAYBALER_CONDA_ENV_NAME
-    cp $haybaler_dir/*.sh .
-    cp $haybaler_dir/*.py .
-    cp $haybaler_dir/*.R .
-    bash run_haybaler.sh $haybaler_dir >>$output_log 2>&1
+    conda activate "$HAYBALER_CONDA_ENV_NAME"
+    cp "$haybaler_dir"/*.sh .
+    cp "$haybaler_dir"/*.py .
+    cp "$haybaler_dir"/*.R .
+    bash run_haybaler.sh "$haybaler_dir" >>"$output_log" 2>&1
     wait
-    cp $haybaler_dir/runbatch_heatmaps.sh haybaler_output/ && cp $haybaler_dir/*.R haybaler_output/
-    cp $haybaler_dir/*tax* haybaler_output/
-    cp $haybaler_dir/*tree* haybaler_output/
+    cp "$haybaler_dir"/runbatch_heatmaps.sh haybaler_output/ && cp "$haybaler_dir"/*.R haybaler_output/
+    cp "$haybaler_dir"/*tax* haybaler_output/
+    cp "$haybaler_dir"/*tree* haybaler_output/
 
     echo "INFO: Attempting to filter results and create heatmaps. Requires R installation." 
     cd haybaler_output
-    bash runbatch_heatmaps.sh >>$output_log 2>&1
+    bash runbatch_heatmaps.sh >>"$output_log" 2>&1
     echo "INFO: Attempting to add taxonomy. Requires pytaxonkit." 
-    bash run_haybaler_tax.sh >>$output_log 2>&1
+    bash run_haybaler_tax.sh >>"$output_log" 2>&1
     echo "INFO: Attempting to create heat-trees. Requires R installation and packages: packages = c("metacoder", "taxa", "dplyr", "tibble", "ggplot2")." 
-    bash run_heattrees.sh >>$output_log 2>&1
-    cd ..
-    cd ..
+    bash run_heattrees.sh >>"$output_log" 2>&1
+    cd ../..
     echo "INFO: Sleeping for "$sleeptimer "to allow writes to complete."
     sleep $sleeptimer
 
     echo "INFO: Start csv to xlsx conversion"
-    bash runbatch_csv_to_xlsx.sh >>$output_log 2>&1
+    bash runbatch_csv_to_xlsx.sh >>"$output_log" 2>&1
     wait
     echo "INFO: Sleeping for "$sleeptimer "to allow writes to complete."
     sleep $sleeptimer
@@ -253,13 +252,13 @@ fi
 
 # leave haybaler conda env, reactivate Wochenende conda env
 conda deactivate
-conda activate $WOCHENENDE_CONDA_ENV_NAME
+conda activate "$WOCHENENDE_CONDA_ENV_NAME"
 
 
 if [[ $runReporting == "1" ]]; then
 
     echo "INFO: Start cleanup reporting"
-    cd $bamDir
+    cd "$bamDir"
     cd reporting
     # create backup, move folders from previous reporting run to a directory (if the txt directory exists already)
     mkdir reporting_$rand_number
@@ -272,23 +271,23 @@ if [[ $runReporting == "1" ]]; then
     mkdir txt csv xlsx
 
     # cleanup .txt, .csv and .xlsx files if they exist in directory
-    count=`ls -1 *.txt 2>/dev/null | wc -l`
+    count=$(find ./*.txt -maxdepth 1 2>/dev/null | wc -l)
     if [[ $count != 0 ]]
         then 
-        mv *.txt txt
+        mv ./*.txt txt
     fi 
-    count=`ls -1 *.csv 2>/dev/null | wc -l`
+    count=$(find ./*.csv -maxdepth 1 2>/dev/null | wc -l)
     if [[ $count != 0 ]]
         then 
-        mv *.csv csv
+        mv ./*.csv csv
     fi 
-    count=`ls -1 *.xlsx 2>/dev/null | wc -l`
+    count=$(find ./*.xlsx -maxdepth 1 2>/dev/null | wc -l)
     if [[ $count != 0 ]]
         then 
-        mv *.xlsx xlsx
+        mv ./*.xlsx xlsx
     fi 
 
-    cd $bamDir
+    cd "$bamDir"
     echo "INFO: Completed cleanup reporting"
 fi
 
@@ -299,7 +298,7 @@ if [[ $runPlotting == "1" ]]
     wait
     echo "INFO: Sleeping for "$sleeptimer "to allow writes to complete."
     sleep $sleeptimer
-    bash runbatch_metagen_window_filter.sh >>$output_log 2>&1
+    bash runbatch_metagen_window_filter.sh >>"$output_log" 2>&1
     wait
     echo "INFO: Completed Sambamba depth and filtering"
 fi
@@ -308,47 +307,63 @@ fi
 # Growth rate
 if [[ $runGrowth == "1" ]]; then
     echo "INFO: Started bacterial growth rate analysis"
-    echo "INFO: Started bacterial growth rate analysis" >>$output_log 2>&1
-    cd $bamDir
+    echo "INFO: Started bacterial growth rate analysis" >>"$output_log" 2>&1
+    cd "$bamDir"
     cd growth_rate/
-    echo "INFO: Cleanup original results" >>$output_log 2>&1
+    echo "INFO: Cleanup original results" >>"$output_log" 2>&1
     rm -rf fit_results >>/dev/null 2>&1
-    rm -rf *_subsamples >>/dev/null 2>&1
-    bash runbatch_bed_to_csv.sh  >>$output_log 2>&1 
+    rm -rf ./*_subsamples >>/dev/null 2>&1
+    bash runbatch_bed_to_csv.sh  >>"$output_log" 2>&1
     wait
     echo "INFO: Sleeping for "$sleeptimer "to allow writes to complete."
     sleep $sleeptimer
 
-    bash run_reproduction_determiner.sh  >>$output_log 2>&1
+    bash run_reproduction_determiner.sh  >>"$output_log" 2>&1
     wait
     echo "INFO: Sleeping for "$sleeptimer "to allow writes to complete."
     sleep $sleeptimer
-    echo "INFO: Files produced by growth rate"   >>$output_log 2>&1
-    ls "fit_results/output/*" >>$output_log 2>&1
-    cd $bamDir
+    echo "INFO: Files produced by growth rate"   >>"$output_log" 2>&1
+    ls "fit_results/output/*" >>"$output_log" 2>&1
+    cd "$bamDir"
     echo "INFO: Completed bacterial growth rate analysis, see growth_rate/fit_results/output for results"
+fi
+
+# MetaG
+if [[ $runMetaG == "1" ]]; then
+    echo "INFO: Started MetaG"
+    echo "INFO: Started MetaG" >>"$output_log" 2>&1
+
+    # shellcheck disable=SC2164
+    cd ./metaG/
+
+    # runs metaG; print output of run_metaG.sh to output_log and simultaneously to console
+    stdbuf -o 0 bash run_metaG.sh 2>&1 | tee -a "$output_log"
+
+    # shellcheck disable=SC2164
+    cd "$bamDir"
+    echo "INFO: Completed MetaG, see growth_rate/{samplename_subsample} for results"
 fi
 
 # Plots
 if [[ $runPlotting == "1" ]]; then
     echo "INFO: Started Wochenende plot"
-    echo "INFO: Started Wochenende plot" >>$output_log 2>&1
-    cd $bamDir
+    echo "INFO: Started Wochenende plot" >>"$output_log" 2>&1
+    cd "$bamDir"
     cd plots
     cp ../*_window.txt . 
     cp ../*_window.txt.filt.csv .
 
-    bash runbatch_wochenende_plot.sh >>$output_log 2>&1
+    bash runbatch_wochenende_plot.sh >>"$output_log" 2>&1
     #wait
     echo "INFO: Sleeping for "$sleeptimer "to allow writes to complete."
     sleep $sleeptimer
-    cd $bamDir
+    cd "$bamDir"
     echo "INFO: Completed Wochenende plot"
 
     echo "INFO:  - Extracting selected human viral pathogen reads"
-    echo "INFO:  - Extracting selected human viral pathogen reads" >>$output_log 2>&1
-    cd $bamDir
-    bash extract_viral_reads.sh >>$output_log 2>&1
+    echo "INFO:  - Extracting selected human viral pathogen reads" >>"$output_log" 2>&1
+    cd "$bamDir"
+    bash extract_viral_reads.sh >>"$output_log" 2>&1
     wait
     echo "INFO: Sleeping for "$sleeptimer "to allow writes to complete."
     sleep $sleeptimer
@@ -357,40 +372,40 @@ fi
 # raspir
 if [[ $runRaspir == "1" ]]; then
     echo "INFO: Run raspir by M. Pust"
-    echo "INFO: Run raspir by M. Pust"  >>$output_log 2>&1
-    conda activate $HAYBALER_CONDA_ENV_NAME
-    cd $bamDir/raspir
+    echo "INFO: Run raspir by M. Pust"  >>"$output_log" 2>&1
+    conda activate "$HAYBALER_CONDA_ENV_NAME"
+    cd "$bamDir"/raspir
     #cleanup
-    rm -f *raspir*.csv >/dev/null 2>/dev/null
-    echo "INFO: link BAM files in"  >>$output_log 2>&1
-    bash batch_create_links.sh  >>$output_log 2>&1
-    echo "INFO: Start preparing the files for raspir. Now with SLURM loop"  >>$output_log 2>&1
+    rm -f ./*raspir*.csv >/dev/null 2>/dev/null
+    echo "INFO: link BAM files in"  >>"$output_log" 2>&1
+    bash batch_create_links.sh  >>"$output_log" 2>&1
+    echo "INFO: Start preparing the files for raspir. Now with SLURM loop"  >>"$output_log" 2>&1
     # Use random number to create unique fileprep job names and avoid clashes when multiple fileprep jobs are running
     rand=$RANDOM
-    for input_bam in `ls *.bam`
+    for input_bam in ./*.bam
         do      
         if [[ "${USE_SLURM}" == "yes" ]]; 
         then
             scheduler=$SLURM_CUSTOM_PARAMS
             # SLURM job scheduler- srun will not work here, need sbatch
-            sbatch -J fileprep$rand run_SLURM_file_prep.sh $input_bam >>$output_log 2>&1
+            sbatch -J fileprep$rand run_SLURM_file_prep.sh "$input_bam" >>"$output_log" 2>&1
         else
             # local job submission
-            bash run_SLURM_file_prep.sh $input_bam >>$output_log 2>&1
+            bash run_SLURM_file_prep.sh "$input_bam" >>"$output_log" 2>&1
         fi
     done
     echo "INFO: waiting for raspir file prep jobs to complete"
     srun --dependency=singleton --job-name=fileprep$rand sleep $sleeptimer
     wait
-    echo "INFO: Run raspir"  >>$output_log 2>&1
-    sbatch run_raspir_SLURM.sh  >>$output_log 2>&1
-    echo "INFO: Remove soft linked BAM files"  >>$output_log 2>&1
-    bash batch_remove_links.sh  >>$output_log 2>&1
-    cd $bamDir
+    echo "INFO: Run raspir"  >>"$output_log" 2>&1
+    sbatch run_raspir_SLURM.sh  >>"$output_log" 2>&1
+    echo "INFO: Remove soft linked BAM files"  >>"$output_log" 2>&1
+    bash batch_remove_links.sh  >>"$output_log" 2>&1
+    cd "$bamDir"
     echo "INFO: Raspir module completed"
 fi
 
 
-echo "INFO: Remember to check the output log for errors at: " $output_log
+echo "INFO: Remember to check the output log for errors at: " "$output_log"
 echo "INFO: ########### Completed Wochenende_postprocess #############"
 
