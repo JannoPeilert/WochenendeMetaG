@@ -39,7 +39,24 @@ cd ../growth_rate/ || { echo -e "ERROR: Can't enter /growth_rate \nERROR: Termin
 
 # primary loop for executing MetaG, starts it for every subdirectory
 for d in *_subsamples/; do
-    cd ./"$d" || { echo -e "ERROR: Can't enter $d \nERROR: Terminating MetaG" && exit 2; }
+    echo "INFO: Starting MetaG for $d"
+
+    # enter subdirectory
+    cd ./"$d" || { pwd ; echo -e "ERROR: Can't enter $d \nERROR: Terminating MetaG" && exit 2; }
+
+    # checks number of csv files in subdirectory
+    count_csv=$( find ./ -type f -name '*.csv' | wc -l )
+    if [ "$count_csv" -eq "0" ]
+    then
+      echo -e "WARNING: Couldn't find .csv files. Skipping this directory"
+      # exit subfolder
+      cd .. || { echo -e "ERROR: Can't escape subdirectory \nERROR: Terminating MetaG" && exit 2; }
+      echo
+      continue
+    else
+      echo "INFO: Found $count_csv .csv files"
+    fi
+
     pwd_dir=$(pwd)
 
     # copies MetaG.properties to current folder
@@ -48,9 +65,6 @@ for d in *_subsamples/; do
     # changes path in MetaG.properties to current folder
     sed -i "4s#.*#DIRECTORY=$pwd_dir#" ./MetaG.properties
 
-    # executes MetaG
-    #sbatch -p normal -c 12 --job-name=metaG ../../metaG/image/bin/MetaG # not functioning
-    echo "INFO: Starting MetaG for $d"
 
     # create valid name for log-file
     echo "metaG_log_$d.log" > temp.metaG
@@ -58,33 +72,39 @@ for d in *_subsamples/; do
     log_file_name=$(sed 's/\///g' temp.metaG)
     rm temp.metaG
 
+    # executes MetaG
+    #sbatch -p normal -c 12 --job-name=metaG ../../metaG/image/bin/MetaG # not functioning
     bash ../../metaG/image/bin/MetaG &> "$log_file_name"
 
+    # TODO: Move loop back when bug with \ and / is solved
+    # simplify output/ make output more readable
+    # all MetaG analysis txt files in subdirectory
+    cd ..   #temp
+    for f in *_MetaG_analysis_*.txt; do
+        # check if files were found
+        if [ "$f" = "*_MetaG_analysis_*.txt" ]
+        then
+                echo "ERROR: No MetaG Analysis file found"
+                continue
+        fi
 
+        echo "INFO: Simplifying on $f"
+
+        if [[ $f == "cutted_"* ]]
+        then
+          echo "INFO: This file seems to be cutted already. Skipping this file"
+          continue
+        fi
+
+
+        # tissue cutting (very careful cutting)
+        #sed "s|.*$d||g" "$f" | sed 's/.*\.s\.mm\.mq30\.calmd\.filt_//g'
+        sed -E 's/.*[^_]_([A-Z][a-z]{2,}_[a-z]{2,})_[^\/]*\.csv/\1/g' "$f" > cutted_"$f"
+
+    done
+    cd ./"$d" #temp
 
     # exit subfolder
     cd .. || { echo -e "ERROR: Can't escape subdirectory \nERROR: Terminating MetaG" && exit 2; }
     echo
 done
-
-# TODO: Move loop back when bug with \ and / is solved
-# simplify output/ make output more readable
-    # all .txt files in subdirectory
-    for f in *_MetaG_analysis_*.txt; do
-        # check if files were found
-        if [ "$f" = "*_MetaG_analysis_*.txt" ]
-        then
-                echo "ERROR: Not MetaG-Analysis-files found"
-                break
-        fi
-
-        echo "INFO: Simplifying on $f"
-        # soft cutting (careful cutting):
-        # deletes in every line everything until inclusive "_1_" | removes "__complete_genome_BAC_pos.csv" | removes "_chromosome"
-        #perl -p -e 's/^.*?_1_//' $f | sed 's/__complete_genome_BAC_pos.csv//g' |
-        #sed 's/_chromosome//g' | sed 's/_...\t/\t/'| sed -E 's/(_strain)?(_[A-Z]{2,}[0-9]*)?//g' > tmpfile"$f" && mv tmpfile"$f" "$f"
-
-        # hard cutting (may cause unexpected behavior)
-        sed 's/.*_[0-9]_//g' "$f" | sed -E 's/(_strain)?_[A-Z]+.*\.csv//g' > tmpfile"$f" && mv tmpfile"$f" "$f"
-    done
-
