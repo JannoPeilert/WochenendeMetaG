@@ -1,10 +1,11 @@
 #!/bin/bash
 # Automated postprocessing of results from the Wochenende pipeline, with wochenende reporting and haybaler.
-# Authors: Colin Davenport, Sophia Poertner
+# Authors: Colin Davenport, Sophia Poertner, Janno Peilert
 
-version="0.36, Jan 2022"
+version="0.37, Nov 2022"
 
 #Changelog
+#0.37 - add MetaG by Arno Kappe, updated and replaced deprecated commands
 #0.36 - add random number to allow concurrent independent fileprep jobs
 #0.35 - update raspir and attempt raspir samtools depth parallel speedup
 #0.34 - resolve bug with ordering of conda envs with -a option (thanks @irosenboom, @vangreuj )
@@ -159,7 +160,6 @@ echo "INFO: Arguments Run growth rate (-g)  : $runGrowth"
 echo "INFO: Arguments Run MetaG (-m)        : $runMetaG"
 
 echo "INFO: Starting Wochenende_postprocess" 
-echo "INFO: Current directory" "$bamDir" >>"$output_log" 2>&1
 echo "INFO: Current directory" "$bamDir"
 echo "INFO: Current directory" "$bamDir" >>"$output_log" 2>&1
 sleep 3
