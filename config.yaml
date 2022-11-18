@@ -21,7 +21,7 @@ THREADS: 12
 rscript_bin: /usr/bin/Rscript
 # Servers configured for heat tree analysis with the metacoder R package. String with all server hostnames separated by space: "server1 server2 server3 ..."
 heattree_server: "hpc-bc15-07 hpc-bc15-12 hpc06 hpc-rc11"
-# Path to conda.sh file. eg. /mnt/ngsnfs/tools/miniconda3/etc/profile.d/conda.sh
+# Path to conda.sh file. e.g. /mnt/ngsnfs/tools/miniconda3/etc/profile.d/conda.sh
 CONDA_SH_PATH: /mnt/ngsnfs/tools/miniconda3/etc/profile.d/conda.sh
 WOCHENENDE_CONDA_ENV_NAME: wochenende
 HAYBALER_CONDA_ENV_NAME: haybaler
