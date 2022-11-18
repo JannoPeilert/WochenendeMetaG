@@ -1,7 +1,7 @@
 #!/bin/bash
 # Janno Peilert, Nov 2022
 # Run MetaG as batch, add SLURM
-
+# based on MetaG by Arno Kappe et al. (https://github.com/ArnoKappe/MetaG)
 
 # Setup SLURM using data parsed from config.yaml
 source "$WOCHENENDE_DIR"/scripts/parse_yaml.sh
@@ -9,12 +9,10 @@ eval $(parse_yaml "$WOCHENENDE_DIR"/config.yaml)
 # Setup job scheduler
 # use SLURM job scheduler (yes, no)
 if [[ "${USE_CUSTOM_SCHED}" == "yes" ]]; then
-    #echo USE_CUSTOM_SCHED set"
-    scheduler=$CUSTOM_SCHED_CUSTOM_PARAMS       #_SINGLECORE
+    scheduler=$CUSTOM_SCHED_CUSTOM_PARAMS #_SINGLECORE
 fi
 if [[ "${USE_SLURM}" == "yes" ]]; then
-    #echo USE_SLURM set"
-    scheduler=$SLURM_CUSTOM_PARAMS              #_SINGLECORE
+    scheduler=$SLURM_CUSTOM_PARAMS #_SINGLECORE
 fi
 
 echo "INFO: Starting MetaG"
@@ -72,9 +70,10 @@ for d in *_subsamples/; do
     log_file_name=$(sed 's/\///g' temp.metaG)
     rm temp.metaG
 
-    # executes MetaG
-    #sbatch -p normal -c 12 --job-name=metaG ../../metaG/image/bin/MetaG # not functioning
-    bash ../../metaG/image/bin/MetaG &> "$log_file_name"
+    # executes MetaG, if you get errors regarding java, comment out the scheduler command with a #
+    # and remove # before the bash command
+    $scheduler --job-name=metaG bash ../../metaG/image/bin/MetaG &> "$log_file_name"
+    #bash ../../metaG/image/bin/MetaG &> "$log_file_name"
 
     # TODO: Move loop back when bug with \ and / is solved
     # simplify output/ make output more readable
@@ -96,9 +95,7 @@ for d in *_subsamples/; do
           continue
         fi
 
-
-        # tissue cutting (very careful cutting)
-        #sed "s|.*$d||g" "$f" | sed 's/.*\.s\.mm\.mq30\.calmd\.filt_//g'
+        # cutting path and everything after scientific name
         sed -E 's/.*[^_]_([A-Z][a-z]{2,}_[a-z]{2,})_[^\/]*\.csv/\1/g' "$f" > cutted_"$f"
 
     done
