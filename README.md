@@ -51,7 +51,7 @@ Features include (see programs listed below at the bottom of this page)
 - Normalization (to Bacteria per Human cell, RPMM Reads Per Million sequenced reads per Million reference bases etc, see Reporting below for details)
 - Visualization (chromosome coverage, intended for bacteria in metagenomics projects) (from v1.4)
 - Growth rate estimation. Estimate how fast detected bacteria are growing
-- Rare species prediction (Raspir)
+- Rare species prediction (Raspir and MetaG)
 
 Project Haybaler https://github.com/MHH-RCUG/haybaler allows postprocessing of Wochenende results:
 - collation/integration of multiple reports (reporting csv or bam.txt files) using Python Pandas
@@ -95,9 +95,13 @@ You can just run the pipeline as a normal Python3 script. However, we also offer
 
 `bash runbatch_sbatch_Wochenende.sh`
 
-6. After completion of the alignment and filtering, run wochenende_postprocess.sh (Requires [Haybaler](https://github.com/MHH-RCUG/haybaler) for final integration steps, R for optional automated heatmaps and optionally [raspir](https://github.com/mmpust/raspir) for rare species detection). 
+6. After completion of the alignment and filtering, run wochenende_postprocess.sh (Requires [Haybaler](https://github.com/MHH-RCUG/haybaler) for final integration steps, R for optional automated heatmaps, optionally [raspir](https://github.com/mmpust/raspir) and/or [MetaG] for rare species detection). 
 
-`bash wochenende_postprocess.sh -r -h -s -p -g`
+`bash wochenende_postprocess.sh -r -h -s -p -g -m`
+
+ To simply start all options, type
+
+ `bash wochenende_postprocess.sh -a`
 
 ### Tutorial
 
@@ -227,13 +231,14 @@ This is strongly recommended!
 
 After a successful Wochenende run, make sure you check that all bams have been created and are sized as expected eg `ls -lh *.bam`
 
-Now start the postprocessing script `bash wochenende_postprocess.sh  -r -h -s -g -p` to automatically:
+Now start the postprocessing script `bash wochenende_postprocess.sh  -r -h -s -g -p -m` to automatically:
 - run sambamba depth to get read coverage of all configured BAM files in the current directory
 - run the Wochenende plot to create coverage diagrams (-p)
 - run Wochenende reporting to count and normalize all read data (-r)
 - run the Haybaler report integration tool (-h provided it is installed and configured) 
 - run raspir (-s)
 - run growth_rate analysis (-g)
+- run MetaG (-m)
 - clean up files
 
 This script requires [Haybaler](https://github.com/MHH-RCUG/haybaler) and its dependencies to be installed, and will otherwise fail at some steps.
@@ -333,6 +338,9 @@ The tools in the subfolder growth_rate estimate the speed at which bacteria are 
 
 The external tool [raspir](https://github.com/mmpust/raspir) has been integrated into the pipeline. Raspir is known to reduce the number of false positives in Wochenende output considerably. It works on BAM files created by Wochenende and creates another estimation of which species are present in the metagenomic reads. You must install raspir into it's own conda environment (pandas is required for example) before it will successfully run.
 
+### MetaG
+
+This tool based on Arno Kappe (https://github.com/ArnoKappe/MetaG) uses a different approach to detaimine, whether a species is 
 
 ### Known bugs
 
