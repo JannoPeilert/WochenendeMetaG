@@ -340,7 +340,7 @@ The external tool [raspir](https://github.com/mmpust/raspir) has been integrated
 
 ### MetaG
 
-This tool based on Arno Kappe (https://github.com/ArnoKappe/MetaG) uses a different approach to detaimine, whether a species is 
+This tool based on Arno Kappe (https://github.com/ArnoKappe/MetaG) uses a different approach to detimine, whether a species is existing or not. It uses position data found in growth_rate to calculate the distribution of reads. MetaG needs Java.
 
 ### Known bugs
 
@@ -463,6 +463,8 @@ Thanks to:
 @vangreuj - bugfixes, testing
 
 @LisaHollstein - reference sequences, testing
+
+@JannoPeilert - maintenance, updating
 
 
 
