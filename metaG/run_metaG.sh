@@ -9,9 +9,11 @@ eval $(parse_yaml "$WOCHENENDE_DIR"/config.yaml)
 # Setup job scheduler
 # use SLURM job scheduler (yes, no)
 if [[ "${USE_CUSTOM_SCHED}" == "yes" ]]; then
+    #echo USE_CUSTOM_SCHED set"
     scheduler=$CUSTOM_SCHED_CUSTOM_PARAMS #_SINGLECORE
 fi
 if [[ "${USE_SLURM}" == "yes" ]]; then
+    #echo USE_SLURM set"
     scheduler=$SLURM_CUSTOM_PARAMS #_SINGLECORE
 fi
 
@@ -58,7 +60,7 @@ for d in *_subsamples/; do
     pwd_dir=$(pwd)
 
     # copies MetaG.properties to current folder
-    cp ../../metaG/image/bin/MetaG.properties .
+    cp ../../metaG/bin/MetaG.properties .
 
     # changes path in MetaG.properties to current folder
     sed -i "4s#.*#DIRECTORY=$pwd_dir#" ./MetaG.properties
@@ -72,13 +74,11 @@ for d in *_subsamples/; do
 
     # executes MetaG, if you get errors regarding java, comment out the scheduler command with a #
     # and remove # before the bash command
-    $scheduler --job-name=metaG bash ../../metaG/image/bin/MetaG &> "$log_file_name"
+    $scheduler --job-name=metaG bash ../../metaG/bin/MetaG &> "$log_file_name"
     #bash ../../metaG/image/bin/MetaG &> "$log_file_name"
 
-    # TODO: Move loop back when bug with \ and / is solved
     # simplify output/ make output more readable
     # all MetaG analysis txt files in subdirectory
-    cd ..   #temp
     for f in *_MetaG_analysis_*.txt; do
         # check if files were found
         if [ "$f" = "*_MetaG_analysis_*.txt" ]
@@ -95,11 +95,16 @@ for d in *_subsamples/; do
           continue
         fi
 
+        # check if file has already an output file
+        if [ -f "cutted_$f" ]; then
+          echo "INFO: This file seems to have an output file already. Overwriting"
+          rm "cutted_$f"
+        fi
+
         # cutting path and everything after scientific name
         sed -E 's/.*[^_]_([A-Z][a-z]{2,}_[a-z]{2,})_[^\/]*\.csv/\1/g' "$f" > cutted_"$f"
 
     done
-    cd ./"$d" #temp
 
     # exit subfolder
     cd .. || { echo -e "ERROR: Can't escape subdirectory \nERROR: Terminating MetaG" && exit 2; }
